@@ -8,7 +8,7 @@ from serial import Serial
 from pyubx2 import UBXReader, UBXMessage, SET, POLL
 
 serialName = 'COM15'
-
+'''
 #Connect and set baudRate=921600s
 s = Serial(serialName, 9600, timeout=3)
 
@@ -40,34 +40,50 @@ print(msg)
 output = msg.serialize()
 s.write(output)
 s.close()
-
+'''
 
 stream = Serial(serialName, 921600, timeout=3)
 
 ubr = UBXReader(stream)
 
-msg = UBXMessage("CFG", "CFG-PRT", POLL, portID=1)
-print(msg)
-output = msg.serialize()
-stream.write(output)
 
-while(True):
-    (raw_data, parsed_data) = ubr.read()
-    print(parsed_data.identity,parsed_data, flush=True )
-    if 'CFG-PRT' in parsed_data.identity:
-        print(parsed_data.baudRate,parsed_data.baudRate==921600)
-        if parsed_data.baudRate==921600:
-            print('OK')
-        break
-    #    print(parsed_data.iTOW,parsed_data.lon,parsed_data.lat,parsed_data.height, flush=True)
 
+
+
+
+def poll(ubxClass, ubxID, **params):
+    msg = UBXMessage(ubxClass, ubxID, POLL, **params)
+    print(msg)
+    output = msg.serialize()
+    stream.write(output)
+
+    while(True):
+        (raw_data, parsed_data) = ubr.read()
+        if ubxID in parsed_data.identity:
+            print(parsed_data.identity,parsed_data, flush=True )
+            break
+
+poll("CFG", "CFG-PRT", portID=1)
+poll("CFG", "CFG-NAV5")
+poll("CFG", "CFG-TP5")
+poll("CFG", "CFG-RATE")
+
+poll("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x00) # NMEA-Standard GGA
+poll("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x01) # NMEA-Standard GLL
+poll("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x02) # NMEA-Standard GSA
+poll("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x03) # NMEA-Standard GSV
+poll("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x04) # NMEA-Standard RMC
+poll("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x05) # NMEA-Standard VTG
+
+poll("CFG", "CFG-MSG",msgClass=0x0a,msgID=0x09) # UBX-MON-HW (0x0a 0x09)
+poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x36) # UBX-NAV-COV (0x01 0x36)
+poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x07) # UBX-NAV-PVT (0x01 0x07)
+poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x03) # UBX-NAV-STATUS (0x01 0x03)
+poll("CFG", "CFG-MSG",msgClass=0x0d,msgID=0x03) # UBX-TIM-TM2 (0x0d 0x03)
 
 '''
-- UBX-MON-HW (0x0a 0x09)
-- UBX-NAV-COV (0x01 0x36)
-- UBX-NAV-PVT (0x01 0x07)
-- UBX-NAV-STATUS (0x01 0x03)
-- UBX-TIM-TM2 (0x0d 0x03)
+# UBX-MON-HW (0x0a 0x09)
+
 '''
 
 
