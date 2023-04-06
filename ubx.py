@@ -8,48 +8,45 @@ from serial import Serial
 from pyubx2 import UBXReader, UBXMessage, SET, POLL
 
 serialName = 'COM15'
-'''
-#Connect and set baudRate=921600s
-s = Serial(serialName, 9600, timeout=3)
 
-# CFG-PRT <UBX(CFG-PRT, portID=1, reserved0=0, enable=0, pol=0, pin=0, thres=0, charLen=3, parity=4, nStopBits=0, baudRate=921600, inUBX=1, inNMEA=1, inRTCM=0, inRTCM3=1, outUBX=1, outNMEA=1, outRTCM3=1, extendedTxTimeout=0, reserved1=0)>
-msg = UBXMessage(
-            'CFG',
-            'CFG-PRT', 
-            SET, 
-            portID=1, 
-            reserved0=0, 
-            enable=0, 
-            pol=0, 
-            pin=0, 
-            thres=0, 
-            charLen=3, 
-            parity=4, 
-            nStopBits=0, 
-            baudRate=921600, 
-            inUBX=1, 
-            inNMEA=1, 
-            inRTCM=0, 
-            inRTCM3=1, 
-            outUBX=1, 
-            outNMEA=1, 
-            outRTCM3=1, 
-            extendedTxTimeout=0, 
-            reserved1=0)
-print(msg)
-output = msg.serialize()
-s.write(output)
-s.close()
-'''
+def update_boudRate(old,new=921600):
+    s = Serial(serialName, old, timeout=3)
+    msg = UBXMessage(
+                'CFG',
+                'CFG-PRT', 
+                SET, 
+                portID=1, 
+                reserved0=0, 
+                enable=0, 
+                pol=0, 
+                pin=0, 
+                thres=0, 
+                charLen=3, 
+                parity=4, 
+                nStopBits=0, 
+                baudRate=921600, 
+                inUBX=1, 
+                inNMEA=1, 
+                inRTCM=0, 
+                inRTCM3=1, 
+                outUBX=1, 
+                outNMEA=1, 
+                outRTCM3=1, 
+                extendedTxTimeout=0, 
+                reserved1=0)
+    print(msg)
+    output = msg.serialize()
+    s.write(output)
+    s.close()
+
+update_boudRate(38400)
+update_boudRate(9600)
 
 stream = Serial(serialName, 921600, timeout=3)
 
 ubr = UBXReader(stream)
-
-
-
-
-
+(raw_data, parsed_data) = ubr.read()
+print('-- Some kind of valid data is received:',parsed_data.identity, flush=True )
 
 def poll(ubxClass, ubxID, **params):
     msg = UBXMessage(ubxClass, ubxID, POLL, **params)
@@ -61,6 +58,7 @@ def poll(ubxClass, ubxID, **params):
         (raw_data, parsed_data) = ubr.read()
         if ubxID in parsed_data.identity:
             print(parsed_data.identity,parsed_data, flush=True )
+            return parsed_data
             break
 
 poll("CFG", "CFG-PRT", portID=1)
@@ -81,22 +79,80 @@ poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x07) # UBX-NAV-PVT (0x01 0x07)
 poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x03) # UBX-NAV-STATUS (0x01 0x03)
 poll("CFG", "CFG-MSG",msgClass=0x0d,msgID=0x03) # UBX-TIM-TM2 (0x0d 0x03)
 
-'''
-# UBX-MON-HW (0x0a 0x09)
+def setup(ubxClass, ubxID, **params):
+    msg = UBXMessage(ubxClass,ubxID, SET, **params)
+    print(msg)
+    output = msg.serialize()
+    stream.write(output)
 
-'''
+setup(
+        'CFG',
+        'CFG-NAV5', 
+        dyn=1, 
+        minEl=1, 
+        posFixMode=1, 
+        drLim=1, 
+        posMask=1, 
+        timeMask=1, 
+        staticHoldMask=1, 
+        dgpsMask=1, 
+        cnoThreshold=1, 
+        utc=1, 
+        dynModel=7, 
+        fixMode=3, 
+        fixedAlt=0.0, 
+        fixedAltVar=1.0, 
+        minElev=10, 
+        drLimit=0, 
+        pDop=25.0, 
+        tDop=25.0, 
+        pAcc=100, 
+        tAcc=350, 
+        staticHoldThresh=0, 
+        dgnssTimeOut=60, 
+        cnoThreshNumSVs=0, 
+        cnoThresh=0, 
+        reserved0=0, 
+        staticHoldMaxDist=0, 
+        utcStandard=0, 
+        reserved1=0)
 
+setup(
+        'CFG',
+        'CFG-TP5', 
+        tpIdx=0, 
+        version=1, 
+        reserved0=0, 
+        antCableDelay=50, 
+        rfGroupDelay=0, 
+        freqPeriod=100000, 
+        freqPeriodLock=100000, 
+        pulseLenRatio=10000, 
+        pulseLenRatioLock=10000, 
+        userConfigDelay=0, 
+        active=1, 
+        lockGnssFreq=1, 
+        lockedOtherSet=1, 
+        isFreq=0, 
+        isLength=1, 
+        alignToTow=1, 
+        polarity=1, 
+        gridUtcGnss=0, 
+        syncMode=0)
 
-'''
-#- UBX-NAV-COV (0x01 0x36)
-msg = UBXMessage('CFG','CFG-MSG', SET, msgClass=0x01, msgID=0x36, rateUART1=0)
-print(msg)
-output = msg.serialize()
-stream.write(output)
+setup("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x00, rateDDC=0, rateUART1=0, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # NMEA-Standard GGA
+setup("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x01, rateDDC=0, rateUART1=0, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # NMEA-Standard GLL
+setup("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x02, rateDDC=0, rateUART1=0, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # NMEA-Standard GSA
+setup("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x03, rateDDC=0, rateUART1=0, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # NMEA-Standard GSV
+setup("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x04, rateDDC=0, rateUART1=0, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # NMEA-Standard RMC
+setup("CFG", "CFG-MSG",msgClass=0xf0,msgID=0x05, rateDDC=0, rateUART1=0, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # NMEA-Standard VTG
 
-# save 
-msg = UBXMessage("CFG","CFG-CFG", SET, saveMask=b"\x1f\x1f\x00\x00", devBBR=1, devFlash=1)
-print(msg)
-output = msg.serialize()
-stream.write(output)
-'''
+setup("CFG", "CFG-MSG",msgClass=0x0a,msgID=0x09, rateDDC=0, rateUART1=1, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # UBX-MON-HW (0x0a 0x09)
+setup("CFG", "CFG-MSG",msgClass=0x01,msgID=0x36, rateDDC=0, rateUART1=1, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # UBX-NAV-COV (0x01 0x36)
+setup("CFG", "CFG-MSG",msgClass=0x01,msgID=0x07, rateDDC=0, rateUART1=1, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # UBX-NAV-PVT (0x01 0x07)
+setup("CFG", "CFG-MSG",msgClass=0x01,msgID=0x03, rateDDC=0, rateUART1=1, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # UBX-NAV-STATUS (0x01 0x03)
+setup("CFG", "CFG-MSG",msgClass=0x0d,msgID=0x03, rateDDC=0, rateUART1=1, rateUART2=0, rateUSB=0, rateSPI=0, reserved=0) # UBX-TIM-TM2 (0x0d 0x03)
+
+setup("CFG", "CFG-RATE", measRate=100, navRate=1, timeRef=1)
+
+setup("CFG", "CFG-CFG", saveMask=b"\x1f\x1f\x00\x00", devBBR=1, devFlash=1)
