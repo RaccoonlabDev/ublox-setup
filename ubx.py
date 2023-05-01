@@ -24,7 +24,7 @@ def update_boudRate(old,new=921600):
                 charLen=3, 
                 parity=4, 
                 nStopBits=0, 
-                baudRate=921600, 
+                baudRate=new, 
                 inUBX=1, 
                 inNMEA=1, 
                 inRTCM=0, 
@@ -39,10 +39,12 @@ def update_boudRate(old,new=921600):
     s.write(output)
     s.close()
 
-update_boudRate(38400)
-update_boudRate(9600)
+TARGET_BOUDRATE = 115200
 
-stream = Serial(serialName, 921600, timeout=3)
+update_boudRate(38400,TARGET_BOUDRATE)
+update_boudRate(9600,TARGET_BOUDRATE)
+
+stream = Serial(serialName, TARGET_BOUDRATE, timeout=3)
 
 ubr = UBXReader(stream)
 (raw_data, parsed_data) = ubr.read()
