@@ -10,7 +10,7 @@ from pyubx2 import UBXReader, UBXMessage, SET, POLL
 serialName = 'COM15'
 
 def update_boudRate(old,new=921600):
-    s = Serial(serialName, old, timeout=3)
+    #s = Serial(serialName, old, timeout=3)
     msg = UBXMessage(
                 'CFG',
                 'CFG-PRT', 
@@ -36,14 +36,15 @@ def update_boudRate(old,new=921600):
                 reserved1=0)
     print(msg)
     output = msg.serialize()
-    s.write(output)
-    s.close()
+    print(output)
+    #s.write(output)
+    #s.close()
 
-TARGET_BOUDRATE = 115200
+TARGET_BOUDRATE = 921600
 
 update_boudRate(38400,TARGET_BOUDRATE)
 update_boudRate(9600,TARGET_BOUDRATE)
-
+'''
 stream = Serial(serialName, TARGET_BOUDRATE, timeout=3)
 
 ubr = UBXReader(stream)
@@ -62,7 +63,9 @@ def poll(ubxClass, ubxID, **params):
             print(parsed_data.identity,parsed_data, flush=True )
             return parsed_data
             break
+'''
 
+'''
 poll("CFG", "CFG-PRT", portID=1)
 poll("CFG", "CFG-NAV5")
 poll("CFG", "CFG-TP5")
@@ -80,12 +83,13 @@ poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x36) # UBX-NAV-COV (0x01 0x36)
 poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x07) # UBX-NAV-PVT (0x01 0x07)
 poll("CFG", "CFG-MSG",msgClass=0x01,msgID=0x03) # UBX-NAV-STATUS (0x01 0x03)
 poll("CFG", "CFG-MSG",msgClass=0x0d,msgID=0x03) # UBX-TIM-TM2 (0x0d 0x03)
-
+'''
 def setup(ubxClass, ubxID, **params):
     msg = UBXMessage(ubxClass,ubxID, SET, **params)
     print(msg)
     output = msg.serialize()
-    stream.write(output)
+    print(output)
+    #stream.write(output)
 
 setup(
         'CFG',
