@@ -57,9 +57,9 @@ def update_boudRate(old,new=921600):
         s.close()
     
 
-TARGET_BOUDRATE = args.targetBoudrate #921600
+TARGET_BOUDRATE = int(args.targetBoudrate) #921600
 
-update_boudRate(38400,TARGET_BOUDRATE)
+update_boudRate(115200,TARGET_BOUDRATE)
 update_boudRate(9600,TARGET_BOUDRATE)
 
 if 'UART' in args.output:
