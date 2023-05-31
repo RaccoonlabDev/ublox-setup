@@ -1,7 +1,6 @@
-#https://content.u-blox.com/sites/default/files/documents/u-blox-F9-HPG-1.32_InterfaceDescription_UBX-22008968.pdf
+#!/usr/bin/env python3
+# https://content.u-blox.com/sites/default/files/documents/u-blox-F9-HPG-1.32_InterfaceDescription_UBX-22008968.pdf
 
-
-#pip install pyubx2
 #pip install pyserial
 
 from serial import Serial
