@@ -9,7 +9,7 @@ import struct
 import json
 
 argParser = argparse.ArgumentParser()
-argParser.add_argument("-s", "--serialName", help="Serial name like COM15 or ttyS0", default='COM15')
+argParser.add_argument("-s", "--serialName", help="Serial name like COM15 or ttyS0", default='COM11')
 argParser.add_argument("-b", "--targetBoudrate", help="Type target boudrate", default=921600)
 argParser.add_argument("-o", "--output", help="target output method UART or save to bin (BIN)", default='UART')
 
